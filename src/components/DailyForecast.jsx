@@ -1,3 +1,5 @@
+import { InfoIcons } from "./WeatherIcons"
+
 export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
     const formatDate = (dateStr) => {
         const date = new Date(dateStr)
@@ -32,7 +34,9 @@ export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
                         <span className="text-blue-600 dark:text-blue-400">Temp. Máxima</span>
                         <div className="text-2xl font-bold">{Math.round(day.maxTemp)}°C</div>
                     </div>
-                    <div className="text-3xl">🌡️</div>
+                    <div className="text-blue-600 dark:text-blue-400">
+                        <InfoIcons.thermometer />
+                    </div>
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-center justify-between">
@@ -40,7 +44,9 @@ export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
                         <span className="text-blue-600 dark:text-blue-400">Temp. Mínima</span>
                         <div className="text-2xl font-bold">{Math.round(day.minTemp)}°C</div>
                     </div>
-                    <div className="text-3xl">🌡️</div>
+                    <div className="text-blue-600 dark:text-blue-400">
+                        <InfoIcons.thermometer />
+                    </div>
                 </div>
 
                 <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg flex items-center justify-between">
@@ -48,7 +54,9 @@ export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
                         <span className="text-amber-600 dark:text-amber-400">Amanecer</span>
                         <div className="text-2xl font-bold">{formatTime(day.sunrise)}</div>
                     </div>
-                    <div className="text-3xl">🌅</div>
+                    <div className="text-amber-600 dark:text-amber-400">
+                        <InfoIcons.sunrise />
+                    </div>
                 </div>
 
                 <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg flex items-center justify-between">
@@ -56,7 +64,9 @@ export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
                         <span className="text-indigo-600 dark:text-indigo-400">Atardecer</span>
                         <div className="text-2xl font-bold">{formatTime(day.sunset)}</div>
                     </div>
-                    <div className="text-3xl">🌇</div>
+                    <div className="text-indigo-600 dark:text-indigo-400">
+                        <InfoIcons.sunset />
+                    </div>
                 </div>
             </div>
 
@@ -68,7 +78,7 @@ export default function DailyForecast({ day, hourlyData, getWeatherIcon }) {
                         .map((hour) => (
                             <div key={hour.time} className="flex flex-col items-center">
                                 <div className="text-sm font-medium mb-1">{formatHour(hour.time)}</div>
-                                <div className="text-2xl mb-1">{getWeatherIcon(hour.weatherCode)}</div>
+                                <div className="mb-1 text-gray-600 dark:text-gray-300">{getWeatherIcon(hour.weatherCode)}</div>
                                 <div className="font-medium">{Math.round(hour.temperature)}°</div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
                                     {hour.precipitation > 0 ? `${hour.precipitation} mm` : ""}

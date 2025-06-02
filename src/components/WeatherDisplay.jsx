@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect } from "preact/hooks"
-import { fetchWeatherData } from "../utils/api.js"
+import { fetchWeatherData } from "../utils/api"
 import { getUserLocation } from "../utils/location"
-import DailyForecast from "./DailyForecast.jsx"
+import DailyForecast from "./DailyForecast"
+import { WeatherIcons, InfoIcons } from "./WeatherIcons"
 
 export default function WeatherDisplay() {
     const [weatherData, setWeatherData] = useState(null)
@@ -94,33 +95,34 @@ export default function WeatherDisplay() {
     if (!weatherData) return null
 
     const getWeatherIcon = (code) => {
-        const codeMap = {
-            0: "☀️", // Clear sky
-            1: "🌤️", // Mainly clear
-            2: "⛅", // Partly cloudy
-            3: "☁️", // Overcast
-            45: "🌫️", // Fog
-            48: "🌫️", // Depositing rime fog
-            51: "🌦️", // Light drizzle
-            53: "🌦️", // Moderate drizzle
-            55: "🌧️", // Dense drizzle
-            61: "🌧️", // Slight rain
-            63: "🌧️", // Moderate rain
-            65: "🌧️", // Heavy rain
-            71: "❄️", // Slight snow fall
-            73: "❄️", // Moderate snow fall
-            75: "❄️", // Heavy snow fall
-            77: "❄️", // Snow grains
-            80: "🌧️", // Slight rain showers
-            81: "🌧️", // Moderate rain showers
-            82: "🌧️", // Violent rain showers
-            85: "🌨️", // Slight snow showers
-            86: "🌨️", // Heavy snow showers
-            95: "⛈️", // Thunderstorm
-            96: "⛈️", // Thunderstorm with slight hail
-            99: "⛈️", // Thunderstorm with heavy hail
+        const iconMap = {
+            0: WeatherIcons[0], // Clear sky
+            1: WeatherIcons[1], // Mainly clear
+            2: WeatherIcons[2], // Partly cloudy
+            3: WeatherIcons[3], // Overcast
+            45: WeatherIcons[45], // Fog
+            48: WeatherIcons[45], // Depositing rime fog
+            51: WeatherIcons[51], // Light drizzle
+            53: WeatherIcons[51], // Moderate drizzle
+            55: WeatherIcons[61], // Dense drizzle
+            61: WeatherIcons[61], // Slight rain
+            63: WeatherIcons[61], // Moderate rain
+            65: WeatherIcons[61], // Heavy rain
+            71: WeatherIcons[71], // Slight snow fall
+            73: WeatherIcons[71], // Moderate snow fall
+            75: WeatherIcons[71], // Heavy snow fall
+            77: WeatherIcons[71], // Snow grains
+            80: WeatherIcons[61], // Slight rain showers
+            81: WeatherIcons[61], // Moderate rain showers
+            82: WeatherIcons[61], // Violent rain showers
+            85: WeatherIcons[71], // Slight snow showers
+            86: WeatherIcons[71], // Heavy snow showers
+            95: WeatherIcons[95], // Thunderstorm
+            96: WeatherIcons[95], // Thunderstorm with slight hail
+            99: WeatherIcons[95], // Thunderstorm with heavy hail
         }
-        return codeMap[code] || "❓"
+        const IconComponent = iconMap[code] || WeatherIcons[0]
+        return <IconComponent />
     }
 
     const formatDate = (dateStr) => {
@@ -136,7 +138,8 @@ export default function WeatherDisplay() {
         <div className="space-y-8">
             <div className="text-center">
                 <h2 className="text-2xl font-bold mb-1">
-                    {weatherData.location.name}, {weatherData.location.province}
+                    {weatherData.location.name}
+                    {weatherData.location.province && `, ${weatherData.location.province}`}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                     {weatherData.location.region}, {weatherData.location.country}
@@ -146,7 +149,7 @@ export default function WeatherDisplay() {
             <div className="bg-gradient-to-br from-blue-600 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white rounded-2xl p-6 shadow-lg">
                 <div className="flex flex-col md:flex-row items-center justify-between">
                     <div className="flex items-center mb-4 md:mb-0">
-                        <div className="text-7xl mr-4">{getWeatherIcon(weatherData.current.weatherCode)}</div>
+                        <div className="text-white mr-4 scale-150">{getWeatherIcon(weatherData.current.weatherCode)}</div>
                         <div>
                             <div className="text-4xl font-bold">{Math.round(weatherData.current.temperature)}°C</div>
                             <div className="text-blue-200">Sensación: {Math.round(weatherData.current.feelsLike)}°C</div>
@@ -155,19 +158,27 @@ export default function WeatherDisplay() {
 
                     <div className="grid grid-cols-2 gap-x-8 gap-y-2">
                         <div className="flex items-center">
-                            <span className="mr-2">💧</span>
+              <span className="mr-2 text-blue-200">
+                <InfoIcons.humidity />
+              </span>
                             <span>Humedad: {weatherData.current.humidity}%</span>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-2">💨</span>
+              <span className="mr-2 text-blue-200">
+                <InfoIcons.wind />
+              </span>
                             <span>Viento: {weatherData.current.windSpeed} km/h</span>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-2">🌧️</span>
+              <span className="mr-2 text-blue-200">
+                <InfoIcons.precipitation />
+              </span>
                             <span>Precip: {weatherData.current.precipitation} mm</span>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-2">☀️</span>
+              <span className="mr-2 text-blue-200">
+                <InfoIcons.uv />
+              </span>
                             <span>UV: {weatherData.current.uvIndex}</span>
                         </div>
                     </div>
@@ -185,7 +196,9 @@ export default function WeatherDisplay() {
                             onClick={() => setSelectedDay(index)}
                         >
                             <div className="text-sm font-medium mb-1">{index === 0 ? "Hoy" : formatDate(day.date).split(",")[0]}</div>
-                            <div className="text-3xl my-2">{getWeatherIcon(day.weatherCode)}</div>
+                            <div className="flex justify-center my-2 text-gray-600 dark:text-gray-300">
+                                {getWeatherIcon(day.weatherCode)}
+                            </div>
                             <div className="flex justify-center gap-2">
                                 <span className="font-medium">{Math.round(day.maxTemp)}°</span>
                                 <span className="text-gray-500 dark:text-gray-400">{Math.round(day.minTemp)}°</span>

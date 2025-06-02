@@ -46,7 +46,7 @@ export async function fetchWeatherData(lat, lon) {
             })),
         }
     } catch (error) {
-        console.error("Error buscando datos del clima:", error)
+        console.error("Error fetching weather data:", error)
         throw error
     }
 }
@@ -54,7 +54,7 @@ export async function fetchWeatherData(lat, lon) {
 async function fetchLocationName(lat, lon) {
     try {
         const response = await fetch(
-            `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&count=1&language=es`,
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=es`,
         )
 
         if (!response.ok) {
@@ -63,7 +63,7 @@ async function fetchLocationName(lat, lon) {
 
         const data = await response.json()
 
-        if (!data.results || data.results.length === 0) {
+        if (!data || !data.address) {
             return {
                 name: "Ubicación desconocida",
                 country: "",
@@ -72,14 +72,48 @@ async function fetchLocationName(lat, lon) {
             }
         }
 
+        const address = data.address
+
+        const name =
+            address.city ||
+            address.town ||
+            address.village ||
+            address.municipality ||
+            address.county ||
+            "Ubicación desconocida"
+        const admin2 = address.province || address.state_district || ""
+        const admin1 = address.state || address.region || ""
+        const country = address.country || ""
+
         return {
-            name: data.results[0].name,
-            country: data.results[0].country,
-            admin1: data.results[0].admin1 || "",
-            admin2: data.results[0].admin2 || "",
+            name: name,
+            country: country,
+            admin1: admin1,
+            admin2: admin2,
         }
     } catch (error) {
-        console.error("Error buscando el nombre de ubicación:", error)
+        console.error("Error fetching location name:", error)
+        try {
+            const fallbackResponse = await fetch(
+                `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&count=1&language=es`,
+            )
+
+            if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json()
+                if (fallbackData.results && fallbackData.results.length > 0) {
+                    const result = fallbackData.results[0]
+                    return {
+                        name: result.name,
+                        country: result.country,
+                        admin1: result.admin1 || "",
+                        admin2: result.admin2 || "",
+                    }
+                }
+            }
+        } catch (fallbackError) {
+            console.error("Fallback geocoding also failed:", fallbackError)
+        }
+
         return {
             name: "Vidreres",
             country: "España",
@@ -114,7 +148,7 @@ export async function searchLocation(query) {
             admin2: result.admin2 || "",
         }))
     } catch (error) {
-        console.error("Error buscando ubicación:", error)
+        console.error("Error searching location:", error)
         return []
     }
 }
